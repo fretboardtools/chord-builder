@@ -220,6 +220,384 @@ const ALL_CHORDS = CHORD_FAMILIES.flatMap(f =>
   f.chords.map(c => ({ ...c, family: f.family, color: f.color, dark: f.dark, familyId: f.id }))
 );
 
+// ─── Suggested voicings (fret positions per string, null = muted/not played) ──
+// Format: [E2, A2, D3, G3, B3, E4] fret numbers, null = don't play
+
+const VOICINGS = {
+  // ── Major 7th family ──────────────────────────────────────────────────────
+  maj7: [
+    {
+      name: "Open E-shape",
+      frets: [0,2,2,1,0,0],
+      fingers: "Full 6-string open shape — warm and familiar",
+      tones: "R · 3 · 5 · maj7 · R · 3",
+      notes: "Great starting point. The maj7 on the G string is what you'll hear most clearly.",
+    },
+    {
+      name: "A-string root (barre)",
+      frets: [null,3,2,4,4,3],
+      fingers: "Moveable barre shape — used everywhere in jazz",
+      tones: "R · 5 · maj7 · 3 · 5",
+      notes: "The most important moveable maj7 shape. Root on A string, slide it anywhere.",
+    },
+    {
+      name: "Jazz shell (top 4)",
+      frets: [null,null,3,4,4,3],
+      fingers: "Compact 4-string shape — clean and pianistic",
+      tones: "R · maj7 · 3 · 5",
+      notes: "Drop the bottom strings. The 5th is optional here — try lifting that finger for R · maj7 · 3.",
+    },
+  ],
+  maj9: [
+    {
+      name: "Open 9th voicing",
+      frets: [null,3,2,0,0,2],
+      fingers: "Root on A string, 9th on high E — spacious",
+      tones: "R · 5 · maj7 · 3 · 9",
+      notes: "The 9th on the high E gives it that airy, floating quality. Very neo-soul.",
+    },
+    {
+      name: "Drop-5 jazz voicing",
+      frets: [null,null,3,4,4,5],
+      fingers: "4 strings, 5th omitted — clean and moveable",
+      tones: "R · maj7 · 3 · 9",
+      notes: "No 5th needed. R, maj7, 3, 9 is the most efficient maj9 voicing on guitar.",
+    },
+    {
+      name: "Wide open voicing",
+      frets: [null,3,0,4,0,2],
+      fingers: "Mixed open/fretted — big, spacious sound",
+      tones: "R · maj7 · 3 · 9",
+      notes: "Lets the open strings add resonance. Works beautifully in C and G contexts.",
+    },
+  ],
+  maj11: [
+    {
+      name: "Modal sparse",
+      frets: [null,3,0,0,0,0],
+      fingers: "Just root and open strings — very open",
+      tones: "R · maj7 · 3 · 11",
+      notes: "Deliberately sparse. The 11th clashes with the 3rd so giving them space is the key.",
+    },
+    {
+      name: "No-3rd voicing",
+      frets: [null,3,2,0,3,3],
+      fingers: "Drop the 3rd entirely — removes the clash",
+      tones: "R · 5 · maj7 · 11 · 11",
+      notes: "Omitting the 3rd is the professional move here. Pure modal, dreamy sound.",
+    },
+    {
+      name: "Full upper structure",
+      frets: [null,3,2,0,3,0],
+      fingers: "Root + maj7 + open 9 + 11 — lush",
+      tones: "R · 5 · maj7 · 9 · 11",
+      notes: "The 9 and 11 together with the maj7 create a stacked, orchestral effect.",
+    },
+  ],
+  maj13: [
+    {
+      name: "Jazz 13th (classic)",
+      frets: [null,null,2,4,4,4],
+      fingers: "Top 4 strings — R · maj7 · 3 · 13",
+      tones: "R · maj7 · 3 · 13",
+      notes: "The most efficient maj13 voicing. 13th on top where it rings out most clearly.",
+    },
+    {
+      name: "Full voicing",
+      frets: [null,3,2,4,4,4],
+      fingers: "5-string voicing with root on A",
+      tones: "R · 5 · maj7 · 3 · 13",
+      notes: "Adds the root on A string for a fuller, more grounded sound.",
+    },
+    {
+      name: "Open 13th",
+      frets: [null,3,2,0,0,4],
+      fingers: "Open middle strings, 13th on top",
+      tones: "R · 5 · maj7 · 3 · 13",
+      notes: "The open G and B strings add space. The 13th landing on the high E feels natural.",
+    },
+  ],
+
+  // ── Dominant 7th family ───────────────────────────────────────────────────
+  dom7: [
+    {
+      name: "Open E7",
+      frets: [0,2,0,1,0,0],
+      fingers: "E7 open shape — everyman dominant chord",
+      tones: "R · b7 · 3 · R · 3",
+      notes: "The tritone between the 3rd (G#) and b7 (D) is what gives this its tension. You'll hear it instantly.",
+    },
+    {
+      name: "A7 barre shape",
+      frets: [null,0,2,0,2,0],
+      fingers: "Open A7 — moveable with a barre",
+      tones: "R · 5 · b7 · 3 · 5",
+      notes: "Slide this shape up and barre across for any dominant 7th. The workhorse shape.",
+    },
+    {
+      name: "Jazz shell voicing",
+      frets: [null,null,null,2,2,1],
+      fingers: "Just 3rd, b7, R — the tritone exposed",
+      tones: "3 · b7 · R",
+      notes: "Only three notes but the tritone is right there in the middle. Essential jazz comp shape.",
+    },
+  ],
+  dom9: [
+    {
+      name: "Hendrix E9",
+      frets: [null,null,0,1,0,2],
+      fingers: "The Hendrix shape — iconic funk/rock voicing",
+      tones: "5 · b7 · 3 · 9",
+      notes: "No root needed — the band has it. That b7–9 combination is the whole Hendrix sound.",
+    },
+    {
+      name: "A-root funk 9th",
+      frets: [null,0,2,0,2,2],
+      fingers: "Root on A, 9th doubles on top two strings",
+      tones: "R · 5 · b7 · 3 · 9",
+      notes: "The most complete dominant 9th shape. Used constantly in funk and soul.",
+    },
+    {
+      name: "Compact jazz 9th",
+      frets: [null,null,2,3,2,3],
+      fingers: "4 strings — very moveable jazz voicing",
+      tones: "R · 3 · b7 · 9",
+      notes: "Tight, pianistic. Slide this anywhere and you have a dominant 9th in that key.",
+    },
+  ],
+  dom11: [
+    {
+      name: "Suspended dominant",
+      frets: [null,0,2,0,3,0],
+      fingers: "R + b7 + 11 — open and unresolved",
+      tones: "R · 5 · b7 · 11",
+      notes: "No 3rd — deliberately. The 11th replaces it for a suspended, yearning quality.",
+    },
+    {
+      name: "Full 11th voicing",
+      frets: [null,0,2,2,3,3],
+      fingers: "Root on A, 11th on top two strings",
+      tones: "R · 5 · b7 · 11 · 11",
+      notes: "Dense and dramatic. Perfect before resolving to a dominant 7th or I chord.",
+    },
+    {
+      name: "Shell + 11th",
+      frets: [null,null,2,2,3,null],
+      fingers: "Minimal 3-note shape — R · b7 · 11",
+      tones: "R · b7 · 11",
+      notes: "Stripped back to the essentials. Notice the 3rd is gone — that's intentional for 11th chords.",
+    },
+  ],
+  dom13: [
+    {
+      name: "Jazz 13th (tight)",
+      frets: [null,null,0,1,2,2],
+      fingers: "Compact top 4 strings — essential jazz shape",
+      tones: "5 · b7 · 3 · 13",
+      notes: "The 13th on top, tritone in the middle. Everything you need in four strings.",
+    },
+    {
+      name: "Full dominant 13th",
+      frets: [null,0,0,1,2,2],
+      fingers: "Root on A, full voicing",
+      tones: "R · 5 · b7 · 3 · 13",
+      notes: "Add the root on A string for a grounded, band-ready comp voicing.",
+    },
+    {
+      name: "Shell + 13th",
+      frets: [null,null,null,1,2,2],
+      fingers: "Bare minimum: 3 · b7 · 13",
+      tones: "b7 · 3 · 13",
+      notes: "Three notes, massive sound. The tritone (3 + b7) plus the bright 13th on top. Jazz piano players do this constantly.",
+    },
+  ],
+  dom7sus2: [
+    {
+      name: "Open sus2 dominant",
+      frets: [0,0,2,2,0,0],
+      fingers: "Very open, resonant — E-string roots",
+      tones: "R · R · 5 · 2 · R",
+      notes: "Stacks perfect 5ths and a 2nd — no 3rd, no tension, just floating dominant colour.",
+    },
+    {
+      name: "A-root sus2",
+      frets: [null,0,2,2,0,0],
+      fingers: "Root on A, open top strings",
+      tones: "R · 5 · 2 · b7",
+      notes: "Adds the b7 for a full 7sus2. The open B and E strings add width.",
+    },
+    {
+      name: "Compact moveable",
+      frets: [null,null,0,2,0,2],
+      fingers: "4-string, D-string root — slides anywhere",
+      tones: "R · 2 · 5 · 2",
+      notes: "Omit the b7 and you get pure sus2 ambiguity. Add it back on the B string for the full colour.",
+    },
+  ],
+  dom7sus4: [
+    {
+      name: "Classic A7sus4",
+      frets: [null,0,2,2,3,0],
+      fingers: "The most-used 7sus4 shape — rock standard",
+      tones: "R · 5 · b7 · 4 · R",
+      notes: "That suspended 4th wants to fall to the 3rd. Classic rock and gospel tension.",
+    },
+    {
+      name: "Open E7sus4",
+      frets: [0,2,0,2,0,0],
+      fingers: "Open shape — full and resonant",
+      tones: "R · b7 · 4 · R · R",
+      notes: "All that root doubling gives it a huge, cathedral sound. Strum and let it ring.",
+    },
+    {
+      name: "Jazz 7sus4",
+      frets: [null,null,0,2,1,0],
+      fingers: "Compact 4-string voicing",
+      tones: "R · b7 · 4 · R",
+      notes: "Tight and clean. Move this shape up the neck for any 7sus4 you need.",
+    },
+  ],
+
+  // ── Minor 7th family ──────────────────────────────────────────────────────
+  min7: [
+    {
+      name: "Open Am7",
+      frets: [null,0,2,0,1,0],
+      fingers: "Am7 open — essential chord everyone should know",
+      tones: "R · 5 · b7 · b3 · 5",
+      notes: "Notice the b7 on the G string sitting right next to the b3 on B. That's the minor 7th sound.",
+    },
+    {
+      name: "Open Em7",
+      frets: [0,2,2,0,3,0],
+      fingers: "Em7 open — dark and resonant",
+      tones: "R · b7 · b3 · R · b3",
+      notes: "The low root and b7 stacked at the bottom give this a heavier, darker sound than Am7.",
+    },
+    {
+      name: "Jazz shell (top 4)",
+      frets: [null,null,null,2,1,0],
+      fingers: "3-string jazz voicing — R · b7 · b3",
+      tones: "R · b7 · b3",
+      notes: "Three notes is enough. Move this up the neck — root on G string means any minor 7th is accessible.",
+    },
+  ],
+  min9: [
+    {
+      name: "Open Am9",
+      frets: [null,0,2,0,1,2],
+      fingers: "Am9 — the soul and R&B standard",
+      tones: "R · 5 · b7 · b3 · 9",
+      notes: "The 9th on the high E adds that yearning, open quality. Common in neo-soul and smooth jazz.",
+    },
+    {
+      name: "Compact moveable",
+      frets: [null,null,0,2,1,2],
+      fingers: "D-string root, 4 strings — slides anywhere",
+      tones: "R · b3 · b7 · 9",
+      notes: "No 5th needed. This voicing is complete with just those four tones.",
+    },
+    {
+      name: "Wide open Em9",
+      frets: [0,2,0,0,0,2],
+      fingers: "Open strings ring freely — big, ambient sound",
+      tones: "R · b7 · b3 · R · 9",
+      notes: "Slightly unconventional but beautiful. Let all strings ring and hear the 9th float on top.",
+    },
+  ],
+  min11: [
+    {
+      name: "Modal Am11",
+      frets: [null,0,2,0,3,0],
+      fingers: "Root on A, 11th on B string — classic modal voicing",
+      tones: "R · 5 · b7 · 11 · 5",
+      notes: "In a minor context, the 11th (perfect 4th) sits perfectly — no clash like in major.",
+    },
+    {
+      name: "Open all-strings",
+      frets: [null,0,0,0,1,0],
+      fingers: "Mostly open — very spacious and ambient",
+      tones: "R · b7 · b3 · b3 · 5",
+      notes: "Add a finger on the B string for the b3 and let everything else ring. Very open, Dorian-esque.",
+    },
+    {
+      name: "Compact jazz m11",
+      frets: [null,null,0,2,1,3],
+      fingers: "4 strings — R · b3 · b7 · 11",
+      tones: "R · b3 · b7 · 11",
+      notes: "All four essential tones in one moveable shape. The 11th on top is the star.",
+    },
+  ],
+  min13: [
+    {
+      name: "Dorian voicing",
+      frets: [null,0,2,2,1,2],
+      fingers: "Root on A — R + b3 + b7 + 9 + 13",
+      tones: "R · 5 · b7 · 9 · 13",
+      notes: "The natural 13th (major 6th) over a minor chord is pure Dorian. Very distinctive.",
+    },
+    {
+      name: "Jazz m13 shell",
+      frets: [null,null,0,2,1,2],
+      fingers: "Compact 4-string — b3 + b7 + 9 + 13",
+      tones: "R · b3 · b7 · 13",
+      notes: "Omit the 9th and 11th — just the defining minor + 13th colour. Clean and modern.",
+    },
+    {
+      name: "Open m13 voicing",
+      frets: [null,0,2,0,1,2],
+      fingers: "Open strings add the 13th naturally in Am context",
+      tones: "R · 5 · b7 · b3 · 9",
+      notes: "In the key of Am, the open B and high E give you the 9th and 13th for free. Context-dependent but very effective.",
+    },
+  ],
+  min7sus2: [
+    {
+      name: "Open Am7sus2",
+      frets: [null,0,2,2,0,0],
+      fingers: "Open B and E — floaty and unresolved",
+      tones: "R · 5 · b7 · 2 · R",
+      notes: "Neither fully minor nor suspended — deliberately ambiguous. Works over many chord changes.",
+    },
+    {
+      name: "Full moveable shape",
+      frets: [null,0,2,2,0,2],
+      fingers: "Root on A, 2nd on high E",
+      tones: "R · 5 · b7 · 2 · 2",
+      notes: "The 2nd doubled on top reinforces the sus quality. Slide up the neck for any root.",
+    },
+    {
+      name: "Compact 4-string",
+      frets: [null,null,0,2,0,0],
+      fingers: "D-string root — very open and sparse",
+      tones: "R · 2 · 5 · R",
+      notes: "Strip it back even further. No b7, just R + 2 + 5. Minimal and floating.",
+    },
+  ],
+  min7sus4: [
+    {
+      name: "Modal Am7sus4",
+      frets: [null,0,2,2,3,0],
+      fingers: "Root on A — dark and suspended",
+      tones: "R · 5 · b7 · 4 · R",
+      notes: "The 4th replaces the b3 — darker than dom7sus4 because the b7 adds that minor colour.",
+    },
+    {
+      name: "Dense voicing",
+      frets: [null,0,2,2,3,3],
+      fingers: "Root on A, 4th doubled on top",
+      tones: "R · 5 · b7 · 4 · 4",
+      notes: "The suspended 4th doubled at the top makes it feel very heavy and unresolved.",
+    },
+    {
+      name: "Compact m7sus4",
+      frets: [null,null,0,2,3,0],
+      fingers: "4-string shape — moveable",
+      tones: "R · b7 · 4 · R",
+      notes: "Clean and efficient. The b7 underneath the 4th gives the minor sus colour without the b3.",
+    },
+  ],
+};
 
 // ─── Fretboard builder ────────────────────────────────────────────────────────
 
@@ -230,6 +608,150 @@ function getIntervalName(root, note) {
   const semi = (NOTES.indexOf(note) - NOTES.indexOf(root) + 12) % 12;
   const map = {0:"R",1:"b2",2:"2/9",3:"b3",4:"3",5:"4/11",6:"b5",7:"5",8:"b6/aug5",9:"6/13",10:"b7",11:"maj7"};
   return map[semi] || "?";
+}
+
+function Fretboard({ root, chord, activeTones, onToggleFret, mode, suggestedFrets }) {
+  // activeTones: Set of semitone values (0-11)
+  // suggestedFrets: array of fret numbers per string [E2..E4], null = muted
+  const displayStrings = [...OPEN_STRINGS_LOW_HIGH].reverse(); // high E first
+
+  return (
+    <div style={{ overflowX:"auto", paddingBottom:"4px" }}>
+      <div style={{ minWidth:"620px" }}>
+        {/* Fret numbers */}
+        <div style={{ display:"flex", marginLeft:"36px", marginBottom:"4px" }}>
+          {[0,...Array.from({length:FRET_COUNT},(_,i)=>i+1)].map(fret => (
+            <div key={fret} style={{
+              width:fret===0?"32px":"46px", textAlign:"center",
+              fontSize:"9px", flexShrink:0,
+              color:[3,5,7,9,12].includes(fret)?"#94a3b8":"#475569",
+              fontWeight:[3,5,7,9,12].includes(fret)?"700":"400",
+              fontFamily:"'JetBrains Mono',monospace",
+            }}>{fret===0?"Open":fret}</div>
+          ))}
+        </div>
+
+        {/* Strings */}
+        {displayStrings.map((openNote, di) => {
+          const strIdx = 5 - di; // 0=low E ... 5=high E
+          const isOuter = di===0 || di===5;
+          const sugFret = suggestedFrets ? suggestedFrets[strIdx] : null;
+
+          return (
+            <div key={di} style={{ display:"flex", alignItems:"center", marginBottom:"3px" }}>
+              <div style={{
+                width:"32px", textAlign:"right", paddingRight:"5px",
+                fontSize:"9px", color:"#64748b", flexShrink:0,
+                fontFamily:"'JetBrains Mono',monospace",
+              }}>{openNote}</div>
+
+              {/* Mute indicator for suggested mode */}
+              {mode==="suggested" && suggestedFrets && sugFret===null && (
+                <div style={{
+                  width:"32px", display:"flex", alignItems:"center", justifyContent:"center",
+                  fontSize:"12px", color:"#374151", flexShrink:0,
+                }}>×</div>
+              )}
+
+              {Array.from({length:FRET_COUNT+1},(_,fret) => {
+                const note = addSemi(openNote, fret);
+                const semi = (NOTES.indexOf(note) - NOTES.indexOf(root) + 12) % 12;
+                const toneInfo = chord.tones.find(t => t.semi === semi);
+
+                // Is this dot active?
+                let isActive = false;
+                let isRoot = semi === 0;
+                let dotColor = "#6366f1";
+
+                if (mode === "free") {
+                  isActive = activeTones.has(`${strIdx}-${fret}`);
+                } else {
+                  // suggested mode
+                  isActive = sugFret === fret && sugFret !== null;
+                }
+
+                if (toneInfo) {
+                  if (toneInfo.role === "essential") dotColor = chord.color || "#F59E0B";
+                  else if (toneInfo.role === "colour") dotColor = "#22c55e";
+                  else dotColor = "#94a3b8";
+                }
+                if (isRoot) dotColor = chord.color || "#F59E0B";
+
+                const intervalLabel = getIntervalName(root, note);
+
+                return (
+                  <div
+                    key={fret}
+                    onClick={() => mode==="free" && onToggleFret(strIdx, fret, semi)}
+                    style={{
+                      width:fret===0?"32px":"46px", height:"28px",
+                      display:"flex", alignItems:"center", justifyContent:"center",
+                      position:"relative", flexShrink:0,
+                      cursor: mode==="free" ? "pointer" : "default",
+                    }}
+                  >
+                    {/* String */}
+                    {!(mode==="suggested" && sugFret===null) && (
+                      <div style={{
+                        position:"absolute", top:"50%", left:0, right:0,
+                        height:isOuter?"1px":"2px",
+                        background:"#334155", transform:"translateY(-50%)",
+                      }}/>
+                    )}
+                    {/* Fret bar */}
+                    {fret>0 && !(mode==="suggested" && sugFret===null) && (
+                      <div style={{
+                        position:"absolute", top:0, bottom:0, right:0,
+                        width:fret===12?"3px":"1.5px",
+                        background:fret===12?"#94a3b8":"#1e2535",
+                      }}/>
+                    )}
+                    {/* Hover highlight in free mode */}
+                    {mode==="free" && !isActive && (
+                      <div className="fret-hover" style={{
+                        position:"absolute", inset:2, borderRadius:"50%",
+                        background:"transparent",
+                      }}/>
+                    )}
+                    {/* Note dot */}
+                    {isActive && (
+                      <div style={{
+                        position:"relative", zIndex:2,
+                        width:"22px", height:"22px", borderRadius:"50%",
+                        background: dotColor,
+                        border: isRoot ? "2px solid #fff" : "none",
+                        display:"flex", alignItems:"center", justifyContent:"center",
+                        fontSize:"7px", fontWeight:"700", color:"#fff",
+                        fontFamily:"'JetBrains Mono',monospace",
+                        boxShadow: isRoot ? `0 0 8px ${dotColor}` : "none",
+                        transition:"all 0.15s ease",
+                        animation:"popIn 0.2s ease",
+                      }}>
+                        {intervalLabel}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })}
+
+        {/* Position markers */}
+        <div style={{ display:"flex", marginLeft:"78px", marginTop:"3px" }}>
+          {Array.from({length:FRET_COUNT},(_,i)=>i+1).map(fret => (
+            <div key={fret} style={{ width:"46px", textAlign:"center", flexShrink:0 }}>
+              {[3,5,7,9].includes(fret) && <div style={{ width:"6px",height:"6px",borderRadius:"50%",background:"#1e2535",margin:"0 auto" }}/>}
+              {fret===12 && <div style={{ display:"flex",gap:"4px",justifyContent:"center" }}>
+                <div style={{ width:"6px",height:"6px",borderRadius:"50%",background:"#1e2535" }}/>
+                <div style={{ width:"6px",height:"6px",borderRadius:"50%",background:"#1e2535" }}/>
+              </div>}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 }
 
 // ─── Theme ────────────────────────────────────────────────────────────────────
@@ -261,29 +783,29 @@ const THEMES = {
     colourToneBg: "#14532d",
   },
   light: {
-    bg:       "#f5f6f8",
+    bg:       "#ffffff",
     surface:  "#ffffff",
-    surface2: "#f0f2f5",
-    border:   "#dde1e9",
-    borderMid:"#c8cdd8",
-    borderHi: "#9aa3b2",
-    text:     "#1a2030",
-    textHi:   "#0a0c12",
-    textMid:  "#2d3748",
-    textLo:   "#4a5568",
-    textMute: "#6b7280",
-    textDead: "#c8cdd8",
-    string:   "#c8cdd8",
-    fretBar:  "#dde1e9",
-    fretHi:   "#9aa3b2",
-    fretNum:  "#9aa3b2",
-    fretMark: "#c8cdd8",
-    scrollBg: "#f0f2f5",
-    scrollTh: "#c8cdd8",
-    muted:    "#9aa3b2",
-    roleOptional: "#6b7280",
+    surface2: "#f8f8f6",
+    border:   "#e8e8e4",
+    borderMid:"#d4d4ce",
+    borderHi: "#9a9a94",
+    text:     "#1a1a18",
+    textHi:   "#000000",
+    textMid:  "#3a3a36",
+    textLo:   "#6b6b65",
+    textMute: "#9a9a94",
+    textDead: "#d4d4ce",
+    string:   "#d4d4ce",
+    fretBar:  "#e8e8e4",
+    fretHi:   "#9a9a94",
+    fretNum:  "#9a9a94",
+    fretMark: "#d4d4ce",
+    scrollBg: "#f8f8f6",
+    scrollTh: "#d4d4ce",
+    muted:    "#9a9a94",
+    roleOptional: "#6b6b65",
     colourTone:   "#16a34a",
-    colourToneBg: "#dcfce7",
+    colourToneBg: "#f0fdf4",
   },
 };
 
@@ -295,6 +817,7 @@ export default function ChordBuilder() {
   const [selectedRoot,     setSelectedRoot]     = useState("C");
   const [mode,             setMode]             = useState("build");
   const [buildStep,        setBuildStep]        = useState(0);
+  const [selectedVoicing,  setSelectedVoicing]  = useState(0);
   const [selectedToneIdx,  setSelectedToneIdx]  = useState(null);
   const [isDark,           setIsDark]           = useState(false);
 
@@ -302,6 +825,7 @@ export default function ChordBuilder() {
 
   const family  = CHORD_FAMILIES.find(f => f.id === selectedFamilyId);
   const chord   = ALL_CHORDS.find(c => c.id === selectedChordId);
+  const voicings = VOICINGS[selectedChordId] || [];
 
   const visibleTones = chord.tones.slice(0, buildStep + 1);
   const isDone = buildStep >= chord.tones.length - 1;
@@ -310,11 +834,11 @@ export default function ChordBuilder() {
     setSelectedFamilyId(fid);
     const fam = CHORD_FAMILIES.find(f => f.id===fid);
     setSelectedChordId(fam.chords[0].id);
-    setBuildStep(0); setSelectedToneIdx(null);
+    setBuildStep(0); setSelectedToneIdx(null); setSelectedVoicing(0);
   };
   const handleChordSelect = (cid) => {
     setSelectedChordId(cid);
-    setBuildStep(0); setSelectedToneIdx(null);
+    setBuildStep(0); setSelectedToneIdx(null); setSelectedVoicing(0);
   };
   const handleRootSelect = (root) => setSelectedRoot(root);
   const advance = () => { if (!isDone) setBuildStep(s => s+1); };
@@ -356,13 +880,15 @@ export default function ChordBuilder() {
           <div>
             <div style={{ display:"flex", alignItems:"baseline", gap:"10px", marginBottom:"4px" }}>
               <h1 style={{
-                fontFamily:"'DM Sans',sans-serif", fontSize:"clamp(24px,5vw,36px)",
-                fontWeight:"700", margin:0, color:T.textHi, letterSpacing:"-0.5px",
+                fontFamily:"'DM Sans',sans-serif", fontSize:"clamp(20px,5vw,28px)",
+                fontWeight:"800", margin:0, color:T.textHi, letterSpacing:"-0.5px",
+                textTransform:"uppercase",
               }}>Chord Builder</h1>
               <span style={{
                 fontFamily:"'JetBrains Mono',monospace", fontSize:"9px",
-                color:"#F59E0B", background: isDark ? "#451a03" : "#fef3c7",
-                padding:"2px 7px", borderRadius:"4px", letterSpacing:"1px",
+                color:T.textLo, background:T.surface2,
+                padding:"2px 6px", borderRadius:"2px", letterSpacing:"1px",
+                border:`1px solid ${T.border}`,
               }}>UNLOCK THE GUITAR</span>
             </div>
             <p style={{ color:T.textMute, fontSize:"13px", margin:0 }}>
@@ -376,19 +902,19 @@ export default function ChordBuilder() {
             title={isDark ? "Switch to light mode" : "Switch to dark mode"}
             style={{
               flexShrink:0,
-              padding:"8px 14px",
-              borderRadius:"20px",
-              border:`1.5px solid ${T.border}`,
-              background: T.surface,
+              padding:"6px 12px",
+              borderRadius:"4px",
+              border:`1px solid ${T.border}`,
+              background: T.surface2,
               color: T.textMid,
-              fontSize:"13px",
-              display:"flex", alignItems:"center", gap:"6px",
-              transition:"all 0.15s",
+              fontSize:"12px",
+              display:"flex", alignItems:"center", gap:"5px",
+              cursor:"pointer",
               whiteSpace:"nowrap",
             }}
           >
-            <span style={{ fontSize:"16px" }}>{isDark ? "☀️" : "🌙"}</span>
-            <span style={{ fontSize:"11px", fontFamily:"'JetBrains Mono',monospace", letterSpacing:"0.5px" }}>
+            <span style={{ fontSize:"14px" }}>{isDark ? "☀️" : "🌙"}</span>
+            <span style={{ fontSize:"10px", fontFamily:"'JetBrains Mono',monospace" }}>
               {isDark ? "Light" : "Dark"}
             </span>
           </button>
@@ -468,6 +994,26 @@ export default function ChordBuilder() {
             <div style={{ fontSize:"13px", fontWeight:"600", color:T.textMid, marginBottom:"4px" }}>{chord.name}</div>
             <div style={{ fontSize:"12px", color:T.textLo, lineHeight:"1.65", fontStyle:"italic" }}>{chord.description}</div>
           </div>
+        </div>
+
+        {/* ── Mode tabs ── */}
+        <div style={{ display:"flex", gap:"6px", marginBottom:"12px", flexWrap:"wrap" }}>
+          {[
+            { id:"build",     label:"Build Mode",        desc:"Add tones one by one" },
+            { id:"suggested", label:"Suggested Voicings", desc:"Guitar-ready shapes" },
+          ].map(m => (
+            <button key={m.id} onClick={() => setMode(m.id)} style={{
+              padding:"8px 16px", borderRadius:"8px", fontSize:"12px", fontWeight:"600",
+              border: mode===m.id ? `1.5px solid ${chord.color}` : `1.5px solid ${T.border}`,
+              background: mode===m.id ? `${chord.color}15` : T.surface,
+              color: mode===m.id ? chord.color : T.textMute,
+              transition:"all 0.1s",
+              display:"flex", flexDirection:"column", alignItems:"flex-start", gap:"1px",
+            }}>
+              <span>{m.label}</span>
+              <span style={{ fontSize:"9px", fontFamily:"'JetBrains Mono',monospace", opacity:0.6 }}>{m.desc}</span>
+            </button>
+          ))}
         </div>
 
         {/* ── Tone anatomy ── */}
@@ -557,10 +1103,64 @@ export default function ChordBuilder() {
 
         {/* ── Fretboard ── */}
         <div style={{ background:T.surface, borderRadius:"14px", padding:"18px", border:`1px solid ${T.border}`, marginBottom:"12px" }}>
+          {mode==="suggested" && voicings.length > 0 && (
+            <div style={{ marginBottom:"16px" }}>
+              <SL T={T}>CHOOSE A VOICING ({voicings.length} available)</SL>
+              <div style={{ display:"flex", gap:"5px", flexWrap:"wrap", marginBottom:"12px" }}>
+                {voicings.map((v,i) => (
+                  <button key={i} onClick={() => setSelectedVoicing(i)} style={{
+                    padding:"6px 13px", borderRadius:"7px", fontSize:"11px",
+                    fontWeight: selectedVoicing===i ? "700":"400",
+                    border: selectedVoicing===i ? `1.5px solid ${chord.color}` : `1.5px solid ${T.border}`,
+                    background: selectedVoicing===i ? `${chord.color}18` : T.surface2,
+                    color: selectedVoicing===i ? chord.color : T.textMute,
+                    transition:"all 0.1s",
+                  }}>
+                    {i+1}. {v.name}
+                  </button>
+                ))}
+              </div>
+              {(() => {
+                const v = voicings[selectedVoicing];
+                return (
+                  <div style={{
+                    background:T.surface2, borderRadius:"10px",
+                    border:`1px solid ${chord.color}33`,
+                    padding:"14px 16px", animation:"fadeUp 0.15s ease",
+                  }}>
+                    <div style={{ display:"flex", flexWrap:"wrap", gap:"10px", alignItems:"flex-start", marginBottom:"10px" }}>
+                      <div>
+                        <div style={{ fontSize:"13px", fontWeight:"700", color:T.textMid, marginBottom:"3px" }}>{v.name}</div>
+                        <div style={{ fontSize:"11px", color:T.textMute, fontFamily:"'JetBrains Mono',monospace" }}>{v.fingers}</div>
+                      </div>
+                      {v.tones && (
+                        <div style={{
+                          marginLeft:"auto", padding:"4px 10px",
+                          background:`${chord.color}12`, border:`1px solid ${chord.color}33`,
+                          borderRadius:"6px", fontSize:"10px",
+                          fontFamily:"'JetBrains Mono',monospace", color:chord.color,
+                        }}>{v.tones}</div>
+                      )}
+                    </div>
+                    {v.notes && (
+                      <p style={{
+                        fontSize:"12px", lineHeight:"1.7",
+                        color:T.textLo, margin:0, fontStyle:"italic",
+                        borderTop:`1px solid ${T.border}`, paddingTop:"10px",
+                      }}>{v.notes}</p>
+                    )}
+                  </div>
+                );
+              })()}
+            </div>
+          )}
+
           <SemiFretboard
             root={selectedRoot}
             chord={chord}
+            mode={mode}
             visibleSemis={visibleSemis}
+            suggestedFrets={mode==="suggested" && voicings[selectedVoicing] ? voicings[selectedVoicing].frets : null}
             T={T}
           />
         </div>
@@ -640,14 +1240,14 @@ export default function ChordBuilder() {
 
 // ─── Fretboard with semi-based highlighting ───────────────────────────────────
 
-function SemiFretboard({ root, chord, visibleSemis, T }) {
+function SemiFretboard({ root, chord, mode, visibleSemis, suggestedFrets, T }) {
   const displayStrings = [...OPEN_STRINGS_LOW_HIGH].reverse();
 
   return (
     <div style={{ overflowX:"auto", paddingBottom:"4px" }}>
       <div style={{ minWidth:"620px" }}>
         <div style={{ display:"flex", marginLeft:"36px", marginBottom:"4px" }}>
-          {Array.from({length:FRET_COUNT},(_,i)=>i+1).map(fret => (
+          {[0,...Array.from({length:FRET_COUNT},(_,i)=>i+1)].map(fret => (
             <div key={fret} style={{
               width:fret===0?"32px":"46px", textAlign:"center", fontSize:"9px", flexShrink:0,
               color:[3,5,7,9,12].includes(fret) ? T.fretHi : T.fretNum,
@@ -660,13 +1260,15 @@ function SemiFretboard({ root, chord, visibleSemis, T }) {
         {displayStrings.map((openNote, di) => {
           const strIdx = 5-di;
           const isOuter = di===0||di===5;
+          const sugFret = suggestedFrets ? suggestedFrets[strIdx] : null;
+          const isMuted = suggestedFrets && sugFret===null;
 
           return (
             <div key={di} style={{ display:"flex", alignItems:"center", marginBottom:"3px" }}>
               <div style={{ width:"32px", textAlign:"right", paddingRight:"5px", fontSize:"9px", color:T.fretNum, flexShrink:0, fontFamily:"'JetBrains Mono',monospace" }}>
-                {openNote}
+                {isMuted ? <span style={{ color:T.muted }}>×</span> : openNote}
               </div>
-              {Array.from({length:FRET_COUNT},(_,i)=>i+1).map(fret => {
+              {Array.from({length:FRET_COUNT+1},(_,fret) => {
                 const note = addSemi(openNote, fret);
                 const semi = (NOTES.indexOf(note) - NOTES.indexOf(root) + 12) % 12;
                 const toneInfo = chord.tones.find(t => t.semi===semi);
@@ -675,7 +1277,9 @@ function SemiFretboard({ root, chord, visibleSemis, T }) {
                   : toneInfo.role==="colour" ? T.colourTone : T.roleOptional
                   : null;
 
-                const isActive = visibleSemis.has(semi);
+                const isActive = mode==="build"
+                  ? visibleSemis.has(semi)
+                  : sugFret===fret && !isMuted;
 
                 const iname = getIntervalName(root, note);
                 const isRoot = semi===0;
@@ -687,8 +1291,8 @@ function SemiFretboard({ root, chord, visibleSemis, T }) {
                     display:"flex", alignItems:"center", justifyContent:"center",
                     position:"relative", flexShrink:0,
                   }}>
-                    <div style={{ position:"absolute", top:"50%", left:0, right:0, height:isOuter?"1px":"2px", background:T.string, transform:"translateY(-50%)" }}/>
-                    {fret>0 && <div style={{ position:"absolute", top:0, bottom:0, right:0, width:fret===12?"3px":"1.5px", background:fret===12 ? T.fretHi : T.fretBar }}/>}
+                    {!isMuted && <div style={{ position:"absolute", top:"50%", left:0, right:0, height:isOuter?"1px":"2px", background:T.string, transform:"translateY(-50%)" }}/>}
+                    {fret>0 && !isMuted && <div style={{ position:"absolute", top:0, bottom:0, right:0, width:fret===12?"3px":"1.5px", background:fret===12 ? T.fretHi : T.fretBar }}/>}
 
                     {isActive && (
                       <div style={{
@@ -711,7 +1315,7 @@ function SemiFretboard({ root, chord, visibleSemis, T }) {
           );
         })}
 
-        <div style={{ display:"flex", marginLeft:"46px", marginTop:"3px" }}>
+        <div style={{ display:"flex", marginLeft:"78px", marginTop:"3px" }}>
           {Array.from({length:FRET_COUNT},(_,i)=>i+1).map(fret => (
             <div key={fret} style={{ width:"46px", textAlign:"center", flexShrink:0 }}>
               {[3,5,7,9].includes(fret)&&<div style={{ width:"6px",height:"6px",borderRadius:"50%",background:T.fretMark,margin:"0 auto" }}/>}
