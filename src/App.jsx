@@ -602,7 +602,28 @@ const VOICINGS = {
 // ─── Fretboard builder ────────────────────────────────────────────────────────
 
 const OPEN_STRINGS_LOW_HIGH = ["E","A","D","G","B","E"];
-const FRET_COUNT = 12;
+const FRET_COUNT = 15;
+
+// ─── Transpose a stored voicing to the selected root ──────────────────────────
+// Voicings are authored at a fixed root. Detect that root from the shape's notes
+// and shift the whole shape so it actually sounds in the selected key.
+function voicingRootPc(frets, chordSemis){
+  const played=[];
+  frets.forEach((f,i)=>{ if(f!=null) played.push((NOTES.indexOf(OPEN_STRINGS_LOW_HIGH[i]) + f) % 12); });
+  if(!played.length) return null;
+  const set=new Set(chordSemis);
+  let best=0, bestScore=-1;
+  for(let r=0;r<12;r++){ let sc=0; for(const pc of played) if(set.has((pc-r+12)%12)) sc++; if(sc>bestScore){bestScore=sc;best=r;} }
+  return best;
+}
+function transposeVoicing(frets, chordSemis, targetRootName){
+  const nat=voicingRootPc(frets, chordSemis);
+  if(nat==null) return frets;
+  const tgt=NOTES.indexOf(targetRootName);
+  const s1=((tgt-nat)%12+12)%12;
+  const fit=s=>{ const t=frets.map(f=>f==null?null:f+s); const nz=t.filter(f=>f!=null); return nz.every(f=>f>=0 && f<=FRET_COUNT)?t:null; };
+  return fit(s1-12) || fit(s1) || frets.map(f=>f==null?null:f+s1);
+}
 
 function getIntervalName(root, note) {
   const semi = (NOTES.indexOf(note) - NOTES.indexOf(root) + 12) % 12;
@@ -1160,7 +1181,7 @@ export default function ChordBuilder() {
             chord={chord}
             mode={mode}
             visibleSemis={visibleSemis}
-            suggestedFrets={mode==="suggested" && voicings[selectedVoicing] ? voicings[selectedVoicing].frets : null}
+            suggestedFrets={mode==="suggested" && voicings[selectedVoicing] ? transposeVoicing(voicings[selectedVoicing].frets, chord.tones.map(t=>t.semi), selectedRoot) : null}
             T={T}
           />
         </div>
